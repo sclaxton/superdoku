@@ -2,6 +2,7 @@
 // endbower
 
 @import "reset";
+@import "fonts/museo";
 
 .full {
   width: 100%;
@@ -12,13 +13,17 @@ html, body {
   @extend .full;
 }
 
+table {
+  table-layout: fixed;
+}
+
 #master-container {
   padding-bottom: 10%;
   padding-top: 10%;
 }
 
 #center-container {
-  width: 80%;
+  width: 75%;
   position: relative;
   margin: auto;
   height: 100%;
@@ -30,7 +35,7 @@ html, body {
 }
 
 #aspect-container:before {
-  content: ' ';
+  content: '';
   display: block;
   padding-top: 100%;
 }
@@ -45,22 +50,44 @@ html, body {
 
 #outer {
   @extend .full;
+  position: relative;
+  max-height: 100%;
 }
 
 .inner {
   @extend .full;
-  td {
-    background-color: #91BFFF;
+  .square {
+    background: rgba(145,191,255,0.3);
   }  
 }
 
 .expandable {
   @extend .full;
-  background-color: #91BFFF;
+  background: rgba(145,191,255,0.5);
 }
 
 .expandable:active {
   z-index: 1000;
-  -webkit-transform: scale(3);
+  -webkit-transform: scale(2.5);
+  -ms-transform: scale(2.5);
+  -moz-tranform: scale(2.5);
+  transform: scale(2.5);
+  .inner-inner {
+    visibility: visible;
+  }
 }
+
+.inner-inner {
+  @extend .inner;
+  visibility: hidden;
+  td {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.5vw;
+    font-family: "museo_sans500", sans-serif;
+  }
+}
+
+
+
 
