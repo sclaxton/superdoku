@@ -1,0 +1,11 @@
+table(id='outer')
+  - for (var i = 0; i < 3; i++)
+    tr
+      - for (var j = 0; j < 3; j++)
+        td
+          table(class='inner')
+            - for (var k = 0; k < 3; k++)
+              tr
+                - for (var l = 0; l < 3; l++)
+                  td
+                    .expandable
