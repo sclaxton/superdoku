@@ -1,3 +1,5 @@
+'use strict';
+
 // the viewstate module exposes all info needed
 // by the controller to mutate the state of the view
 
@@ -6,11 +8,11 @@ define(['onload', 'utils'], function(load, utils) {
 
     var flattenArray = utils.flattenArray;
 
-    var buttonsPromise = load.numButtons.then(function(val){
-      return flattenArray(val);
+    var buttonsPromise = load.numButtons.then(function(val) {
+        return flattenArray(val);
     });
-    var squaresPromise = load.boardNodes.then(function(val){
-      return flattenArray(val);
+    var squaresPromise = load.boardNodes.then(function(val) {
+        return flattenArray(val);
     });
     var allChildren = utils.allChildren;
 
@@ -21,32 +23,31 @@ define(['onload', 'utils'], function(load, utils) {
     // board state selectors
     var selectedSquareClass = '.expand-select';
     var hoverSquareClass = '.expand-hover';
-    var squaresSelector = '#board-container .square';
     var boardOutermostContainer = '#board-square';
     var inactiveSquareSelector = '.inactive';
 
     // numpad state selectors
     var selectedButtonClass = '.button-select';
     var hoverButtonClass = '.button-hover';
-    var numpadButtonSelector = '#numpad-container button';
 
-    var focusOutSelection = function(){
-      return $(allChildren(masterContainer))
-        .not(allChildren(boardOutermostContainer) + ',' 
-          + allChildren(controlContainer));
-    }
+    var focusOutSelection = function() {
+        var master = allChildren(masterContainer);
+        var board = allChildren(boardOutermostContainer);
+        var control = allChildren(controlContainer);
+        return $(master).not(board + ',' + control);
+    };
 
     return {
         focusOutSelection: focusOutSelection,
         board: {
             squaresPromise: squaresPromise,
             squares: {
-                inactivate: function(node){
-                  node.classList.add(inactiveSquareSelector);
+                inactivate: function(node) {
+                    node.classList.add(inactiveSquareSelector);
                 },
-                unselectAll: function(){
-                 squares = squaresPromise.value();
-                  $(squares).removeClass(selectedSquareClass);
+                unselectAll: function() {
+                    var squares = squaresPromise.value();
+                    $(squares).removeClass(selectedSquareClass);
                 },
                 onHover: function(node) {
                     node.classList.add(hoverSquareClass);
@@ -56,7 +57,7 @@ define(['onload', 'utils'], function(load, utils) {
                 },
                 onSelect: function(node) {
                     // remove selection from other squares
-                    squares = squaresPromise.value();
+                    var squares = squaresPromise.value();
                     $(squares).removeClass(selectedSquareClass);
                     node.classList.add(selectedSquareClass);
                 }
@@ -65,10 +66,10 @@ define(['onload', 'utils'], function(load, utils) {
         numpad: {
             buttonsPromise: buttonsPromise,
             button: {
-                unselectAll: function(){
-                  // remove selection from other buttons
-                  var buttons = buttonsPromise.value(); 
-                  $(buttons).removeClass(selectedButtonClass);
+                unselectAll: function() {
+                    // remove selection from other buttons
+                    var buttons = buttonsPromise.value();
+                    $(buttons).removeClass(selectedButtonClass);
                 },
                 onHover: function(node) {
                     node.classList.add(hoverButtonClass);
@@ -78,7 +79,7 @@ define(['onload', 'utils'], function(load, utils) {
                 },
                 onSelect: function(node) {
                     // remove selection from other buttons
-                    var buttons = buttonsPromise.value(); 
+                    var buttons = buttonsPromise.value();
                     $(buttons).removeClass(selectedButtonClass);
                     node.classList.add(selectedButtonClass);
                 }

@@ -3,7 +3,7 @@
 // The events module exposes and initializes an event
 // dispatcher, with predefined events
 
-/*global define*/ 
+/*global define*/
 define(['eventEmitter'], function(EventEmitter) {
     var dispatcher = new EventEmitter();
 

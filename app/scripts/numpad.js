@@ -4,10 +4,8 @@
 define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils, viewstate) {
 
     var Controller = utils.controller;
+    var flattenArray = utils.flattenArray;
     var eventDispatcher = events.dispatcher;
-    eventDispatcher.defineEvent('hi');
-
-    console.log(eventDispatcher);
 
     function NumpadView(input) {
         var buttons = [];
@@ -22,9 +20,9 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
                 }
             },
             'allButtons': {
-              get: function(){
-                return flatButtons;
-              }
+                get: function() {
+                    return flatButtons;
+                }
             }
         });
     }
@@ -46,35 +44,39 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
         });
     };
 
-    NumpadController.prototype.initViewState = function(){
-      var view = this.view;
-      var buttonOnSelect = viewstate.numpad.button.onSelect;
-      var buttonOnHover = viewstate.numpad.button.onHover;
-      var buttonOffHover = viewstate.numpad.button.offHover;
-      var buttonUnselectAll = viewstate.numpad.button.unselectAll;
-      var buttons = view.allButtons;
-      var focusOutSelection = viewstate.focusOutSelection();
+    NumpadController.prototype.initViewState = function() {
+        var view = this.view;
+        var buttonOnSelect = viewstate.numpad.button.onSelect;
+        var buttonOnHover = viewstate.numpad.button.onHover;
+        var buttonOffHover = viewstate.numpad.button.offHover;
+        var buttonUnselectAll = viewstate.numpad.button.unselectAll;
+        var buttons = view.allButtons;
+        var focusOutSelection = viewstate.focusOutSelection();
 
-      eventDispatcher.addListener('selectSquare', function(val){
-        var buttonIndex = val-1;
-        var button = buttons[buttonIndex];
-        buttonOnSelect(button);
-      });
+        eventDispatcher.addListener('selectSquare', function(val) {
+            var buttonIndex = val - 1;
+            var button = buttons[buttonIndex];
+            buttonOnSelect(button);
+        });
 
-      $('body').on({ 
-        doubleTap: buttonUnselectAll
-      });
+        $('body').on({
+            doubleTap: buttonUnselectAll
+        });
 
-      $(squaresComplement).on({
-        click: buttonUnselectAll
-      });
+        $(focusOutSelection).on({
+            click: buttonUnselectAll
+        });
 
-      $(this.allNodes).on({
-          click: buttonOnSelect,
-          mouseenter: buttonOnHover,
-          mouseleave: buttonOffHover
-      });
+        $(this.allNodes).on({
+            click: buttonOnSelect,
+            mouseenter: buttonOnHover,
+            mouseleave: buttonOffHover
+        });
+    };
 
-    }
+    return {
+        controller: NumpadController,
+        view: NumpadView
+    };
 
 });

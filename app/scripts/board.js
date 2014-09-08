@@ -6,7 +6,7 @@
 //    BoardController class
 
 /*global define*/
-define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, viewstate){
+define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, viewstate) {
     var Controller = utils.controller;
     var flattenArray = utils.flattenArray;
     var eventDispatcher = events.dispatcher;
@@ -21,7 +21,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
             value = val;
         }
 
-        if (moveable){
+        if (moveable) {
             immutable = moveable;
         }
 
@@ -155,7 +155,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         }
     };
 
-     BoardBase.prototype.isSquareImmutable = function(i, j) {
+    BoardBase.prototype.isSquareImmutable = function(i, j) {
         var square = this.square(i, j);
         return square.immutable;
     };
@@ -210,27 +210,30 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     // now we actually inherit the methods from the base class
     BoardView.prototype = Object.create(BoardBase.prototype);
 
-    BoardView.prototype.indexOf = function(node){
-      var absoluteIndex = this.allNodes.indexOf(node);
-      var row = absoluteIndex / 9;
-      var col = absoluteIndex % 9;
-      return {row: row, col: col};
-    }
+    BoardView.prototype.indexOf = function(node) {
+        var absoluteIndex = this.allNodes.indexOf(node);
+        var row = absoluteIndex / 9;
+        var col = absoluteIndex % 9;
+        return {
+            row: row,
+            col: col
+        };
+    };
 
-    BoardView.prototype.init = function(model){
-      var modelData = flattenArray(model.data);
-      var viewData = flattenArray(this.data);
-      var inactivateSquare = viewstate.board.square.inactivate;
-      modelData.forEach(function(square, i){
-        if(square.value && square.immutable){
-          var domNode = viewData[i].value;
-          domNode.textContent = square.value.toString();
-          inactivate(domNode);
-        } else {
-          viewData[i].immutable = false;
-        }
-      });
-    }
+    BoardView.prototype.init = function(model) {
+        var modelData = flattenArray(model.data);
+        var viewData = flattenArray(this.data);
+        var inactivateSquare = viewstate.board.square.inactivate;
+        modelData.forEach(function(square, i) {
+            if (square.value && square.immutable) {
+                var domNode = viewData[i].value;
+                domNode.textContent = square.value.toString();
+                inactivateSquare(domNode);
+            } else {
+                viewData[i].immutable = false;
+            }
+        });
+    };
 
     function BoardController(view, model) {
         Controller.apply(this, view, model);
@@ -244,58 +247,58 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         var model = this.model;
         var squares = view.allNodes;
         $(squares).on({
-          click:  function(e){
-            var indexPair = view.indexOf(e.target);
-            var targetVal = model.squareVal(indexPair.row, indexPair.col);
-            view.activeSquare = indexPair;
-            eventDispatcher.emit('selectSquare', targetVal);
-          }
+            click: function(e) {
+                var indexPair = view.indexOf(e.target);
+                var targetVal = model.squareVal(indexPair.row, indexPair.col);
+                view.activeSquare = indexPair;
+                eventDispatcher.emit('selectSquare', targetVal);
+            }
         });
 
         eventDispatcher.addListner('numpad', function(val) {
-          var activeSquare = view.activeSquare;
-          var row = activeSquare.row;
-          var col = activeSquare.col;
-          if(activeSquare && model.isSquareImmutable(row, col)){
-            model.squareVal(row, col, val);
-            eventDispatcher.emit('modelUpdate', activeSquare, val);
-          }
+            var activeSquare = view.activeSquare;
+            var row = activeSquare.row;
+            var col = activeSquare.col;
+            if (activeSquare && model.isSquareImmutable(row, col)) {
+                model.squareVal(row, col, val);
+                eventDispatcher.emit('modelUpdate', activeSquare, val);
+            }
         });
 
-        eventDispatcher.addListner('modelUpdate', function(indexPair, val){
-          var node = view.squareVal(indexPair.row, indexPair.col);
-          node.textContent = val.toString();
+        eventDispatcher.addListner('modelUpdate', function(indexPair, val) {
+            var node = view.squareVal(indexPair.row, indexPair.col);
+            node.textContent = val.toString();
         });
     };
 
-    BoardController.prototype.initViewState = function(){
-      var self = this;
-      // viewstate info needed to alter view state
-      var squareUnselectAll = viewstate.board.square.unselectAll;
-      var squareOnSelect = viewstate.board.square.onSelect;
-      var squareOnHover = viewstate.board.square.onHover;
-      var squareOffHover = viewstate.board.square.offHover;
-      var focusOutSelection = viewstate.focusOutSelection();
+    BoardController.prototype.initViewState = function() {
+        var view = this.view;
+        // viewstate info needed to alter view state
+        var squareUnselectAll = viewstate.board.square.unselectAll;
+        var squareOnSelect = viewstate.board.square.onSelect;
+        var squareOnHover = viewstate.board.square.onHover;
+        var squareOffHover = viewstate.board.square.offHover;
+        var focusOutSelection = viewstate.focusOutSelection();
 
-      function unfocusSquare(){
-        squareUnselectAll();
-        view.activeSquare = null;
-      }
+        function unfocusSquare() {
+            squareUnselectAll();
+            view.activeSquare = null;
+        }
 
-      $('body').on({ 
-        doubleTap: unfocusSquare
-      });
+        $('body').on({
+            doubleTap: unfocusSquare
+        });
 
-      $(focusOutSelection).on({
-        click: unfocusSquare
-      });
+        $(focusOutSelection).on({
+            click: unfocusSquare
+        });
 
-      $(this.allNodes).on({
-          click: squareOnSelect,
-          mouseenter: squareOnHover,
-          mouseleave: squareOffHover
-      });
-    }
+        $(this.allNodes).on({
+            click: squareOnSelect,
+            mouseenter: squareOnHover,
+            mouseleave: squareOffHover
+        });
+    };
 
     return {
         data: BoardData,

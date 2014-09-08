@@ -15,8 +15,8 @@ define([], function() {
         return ret;
     }
 
-    function allChildren(selector){
-      return selector + ' *';
+    function allChildren(selector) {
+        return selector + ' *';
     }
 
     function Controller(view, model) {
@@ -41,6 +41,6 @@ define([], function() {
         controller: Controller,
         flattenArray: flattenArray,
         allChildren: allChildren
-    }
+    };
 
 });

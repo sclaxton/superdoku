@@ -5,8 +5,7 @@
 // the rest of the app to be more decoupled from the dom
 // and how long it takes it to load
 
-/*global defi
-ne*/ 
+/*global define*/
 define(['zepto', 'bluebird'], function(zepto, Promise) {
 
     var squaresDivClass = '.expandable';
@@ -16,7 +15,7 @@ define(['zepto', 'bluebird'], function(zepto, Promise) {
     function promiseDOM(resultFunction) {
         // we want to return a promise that resolves to a
         // value we computed by accessing the dom
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
             // wrap in a Zepto call to wait until
             // the dom fully loads
             zepto(function($) {
