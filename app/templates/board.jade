@@ -1,18 +1,11 @@
-table(id='outer')
+table(id='board-outer')
   - for (var i = 0; i < 3; i++)
     tr
       - for (var j = 0; j < 3; j++)
         td
-          table(class='inner')
+          table(class='board-inner')
             - for (var k = 0; k < 3; k++)
               tr
                 - for (var l = 0; l < 3; l++)
                   td.square
                     .expandable
-                      table(class='inner-inner')
-                        - for (var r = 0; r < 3; r++)
-                          tr
-                            - for (var c = 0; c < 3; c++)
-                              td
-                                = (r * 3) + c + 1
-

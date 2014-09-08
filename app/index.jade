@@ -1,3 +1,5 @@
+include ./templates/mixins/square
+
 doctype html
 html
   head
@@ -5,29 +7,26 @@ html
     title superdoku
     meta(name='description', content='')
     meta(name='viewport', content='width=device-width')
-    link(rel='shortcut icon', href='/favicon.ico')
-    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <!-- build:css styles/vendor.css -->
-    <!-- bower:css -->
 
-    <!-- endbower -->
-    <!-- endbuild -->
-    <!-- build:css(.tmp) styles/main.css -->
+    // build:css(.tmp/concat) styles/main.css
     link(rel='stylesheet', href='styles/main.css')
-    <!-- endbuild -->
+    // endbuild
 
-    body
-      #master-container
-        #center-container
-          #aspect-container
-            #board-container
-              include ./templates/board.jade
+  body
+    #master-container
+      +square(id='board-square')
+          #board-container
+            include ./templates/board
+      #control-container
+        +square(id='numpad-square')
+            #numpad-container
+              include ./templates/numpad
+        #menu-container
+          button#undo(class='menu')
+            | Undo
+          button#reset(class='menu')
+            | Reset
 
-        <!-- build:js(app) scripts/vendor.js -->
-        <!-- bower:js -->
-        script(type='text/javascript', src='bower_components/requirejs/require.js')
-        <!-- endbower -->
-        <!-- endbuild -->
-        <!-- build:js({app,.tmp}) scripts/main.js -->
-        script(type='text/javascript', src="scripts/main.js")
-        <!-- endbuild -->
+      // build:js(.tmp/concat) scripts/main.js
+      script(type="text/javascript", src="scripts/main.js", async=true)
+      // endbuild

@@ -1,0 +1,7 @@
+//- id is the id of the square container that will contain content
+//- len is length of the square in % of the parents length
+mixin square
+  .square-container(id!=attributes.id)
+    .aspect-container
+      if block
+        block
