@@ -6,19 +6,23 @@
 //    BoardController class
 
 /*global define*/
-define(['zepto', 'utils', 'events'], function($, utils, events){
+define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, viewstate){
     var Controller = utils.controller;
     var flattenArray = utils.flattenArray;
     var eventDispatcher = events.dispatcher;
 
     // Square class abstracts squares
     // on the board grid
-    function Square(val) {
+    function Square(val, moveable) {
         var value;
-        var moveable;
+        var immutable;
 
         if (val) {
             value = val;
+        }
+
+        if (moveable){
+            immutable = moveable;
         }
 
         // define properties of Square
@@ -29,10 +33,9 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
                 },
                 set: function(arg) {
                     value = arg;
-                    return value;
                 }
             },
-            'moveable': {
+            'immutable': {
                 get: function() {
                     return moveable;
                 }
@@ -70,7 +73,7 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
                     $.each(row, function(val, l) {
                         var ret;
                         if (val) {
-                            ret = new Square(val);
+                            ret = new Square(val, true);
                         } else {
                             ret = new Square();
                         }
@@ -152,6 +155,13 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
         }
     };
 
+     BoardBase.prototype.isSquareImmutable = function(i, j) {
+        var square = this.square(i, j);
+        return square.immutable;
+    };
+
+
+
     // BoardData class inherits from BoardBase class
     // it contains the numerical data for the sudoku board
     // 
@@ -178,20 +188,20 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
         // defined there, namely:
         //  this.data
         BoardBase.call(this, input);
-        var activeNode = null;
-        var allSquares = flattenArray(this.data);
+        var activeSquare = null;
+        var allNodes = flattenArray(input);
         Object.defineProperties(this, {
-            'activeNode': {
+            'activeSquare': {
                 get: function() {
-                    return activeNode;
+                    return activeSquare;
                 },
                 set: function(node) {
-                    activeNode = node;
+                    activeSquare = node;
                 },
-                'allSquares': {
-                    get: function() {
-                        return allSquares;
-                    }
+            },
+            'allNodes': {
+                get: function() {
+                    return allNodes;
                 }
             }
         });
@@ -199,6 +209,28 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
 
     // now we actually inherit the methods from the base class
     BoardView.prototype = Object.create(BoardBase.prototype);
+
+    BoardView.prototype.indexOf = function(node){
+      var absoluteIndex = this.allNodes.indexOf(node);
+      var row = absoluteIndex / 9;
+      var col = absoluteIndex % 9;
+      return {row: row, col: col};
+    }
+
+    BoardView.prototype.init = function(model){
+      var modelData = flattenArray(model.data);
+      var viewData = flattenArray(this.data);
+      var inactivateSquare = viewstate.board.square.inactivate;
+      modelData.forEach(function(square, i){
+        if(square.value && square.immutable){
+          var domNode = viewData[i].value;
+          domNode.textContent = square.value.toString();
+          inactivate(domNode);
+        } else {
+          viewData[i].immutable = false;
+        }
+      });
+    }
 
     function BoardController(view, model) {
         Controller.apply(this, view, model);
@@ -208,12 +240,62 @@ define(['zepto', 'utils', 'events'], function($, utils, events){
     BoardController.prototype = Object.create(Controller.prototype);
 
     BoardController.prototype.init = function() {
-        var squares = flattenArray(this.view.data);
-        //$(squares).on
-        eventDispatcher.addListner('numpad', function(val) {
+        var view = this.view;
+        var model = this.model;
+        var squares = view.allNodes;
+        $(squares).on({
+          click:  function(e){
+            var indexPair = view.indexOf(e.target);
+            var targetVal = model.squareVal(indexPair.row, indexPair.col);
+            view.activeSquare = indexPair;
+            eventDispatcher.emit('selectSquare', targetVal);
+          }
+        });
 
+        eventDispatcher.addListner('numpad', function(val) {
+          var activeSquare = view.activeSquare;
+          var row = activeSquare.row;
+          var col = activeSquare.col;
+          if(activeSquare && model.isSquareImmutable(row, col)){
+            model.squareVal(row, col, val);
+            eventDispatcher.emit('modelUpdate', activeSquare, val);
+          }
+        });
+
+        eventDispatcher.addListner('modelUpdate', function(indexPair, val){
+          var node = view.squareVal(indexPair.row, indexPair.col);
+          node.textContent = val.toString();
         });
     };
+
+    BoardController.prototype.initViewState = function(){
+      var self = this;
+      // viewstate info needed to alter view state
+      var squareUnselectAll = viewstate.board.square.unselectAll;
+      var squareOnSelect = viewstate.board.square.onSelect;
+      var squareOnHover = viewstate.board.square.onHover;
+      var squareOffHover = viewstate.board.square.offHover;
+      var focusOutSelection = viewstate.focusOutSelection();
+
+      function unfocusSquare(){
+        squareUnselectAll();
+        view.activeSquare = null;
+      }
+
+      $('body').on({ 
+        doubleTap: unfocusSquare
+      });
+
+      $(focusOutSelection).on({
+        click: unfocusSquare
+      });
+
+      $(this.allNodes).on({
+          click: squareOnSelect,
+          mouseenter: squareOnHover,
+          mouseleave: squareOffHover
+      });
+    }
 
     return {
         data: BoardData,

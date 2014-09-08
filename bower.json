@@ -2,8 +2,9 @@
   "name": "superdoku",
   "private": true,
   "dependencies": {
-    "jquery": "~1.11.0",
-    "requirejs": "~2.1.14"
+    "almond": "~0.3.0",
+    "eventEmitter": "~4.2.8",
+    "zepto-full": "~1.1.2"
   },
   "devDependencies": {}
 }

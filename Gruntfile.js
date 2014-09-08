@@ -54,7 +54,7 @@ module.exports = function(grunt) {
                 tasks: ['sass:server', 'autoprefixer']
             },
             jade: {
-                files: ['<%= config.app %>/*.jade'],
+                files: ['<%= config.app %>/{,*/}*.jade', '<%= config.app %>/templates/{,*/}*.jade'],
                 tasks: ['jade']
             },
             styles: {

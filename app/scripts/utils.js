@@ -15,6 +15,10 @@ define([], function() {
         return ret;
     }
 
+    function allChildren(selector){
+      return selector + ' *';
+    }
+
     function Controller(view, model) {
         Object.defineProperties(this, {
             'view': {
@@ -35,7 +39,8 @@ define([], function() {
 
     return {
         controller: Controller,
-        flattenArray: flattenArray
+        flattenArray: flattenArray,
+        allChildren: allChildren
     }
 
 });

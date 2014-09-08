@@ -13,6 +13,7 @@ define(['eventEmitter'], function(EventEmitter) {
         'back',
         'restart',
         'numpad',
+        'modelUpdate',
         'selectSquare'
     ]);
 

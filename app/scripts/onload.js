@@ -5,7 +5,8 @@
 // the rest of the app to be more decoupled from the dom
 // and how long it takes it to load
 
-/*global define*/ 
+/*global defi
+ne*/ 
 define(['zepto', 'bluebird'], function(zepto, Promise) {
 
     var squaresDivClass = '.expandable';
@@ -24,20 +25,20 @@ define(['zepto', 'bluebird'], function(zepto, Promise) {
         });
     }
 
-    var squareNodes = promiseDOM(function($) {
+    var boardNodes = promiseDOM(function($) {
         var ret = [];
         // get all the squares then build up
         // the nested array that we want
         var squares = $(squaresDivClass).get();
         for (var i = 0; i < 3; i++) {
             var subrow = [];
-            ret.unshift(subrow);
+            ret.push(subrow);
             for (var j = 0; j < 3; j++) {
                 var subsquare = [];
-                subrow.unshift(subsquare);
+                subrow.push(subsquare);
                 for (var k = 0; k < 3; k++) {
                     var row = squares.splice(0, 3);
-                    subsquare.unshift(row);
+                    subsquare.push(row);
                 }
             }
         }
@@ -51,13 +52,13 @@ define(['zepto', 'bluebird'], function(zepto, Promise) {
         var buttons = $(numButtonsClass).get();
         for (var i = 0; i < 3; i++) {
             var rowButtons = buttons.splice(0, 3);
-            ret.unshift(rowButtons);
+            ret.push(rowButtons);
         }
         return ret;
     });
 
     return {
-        squareNodes: squareNodes,
+        boardNodes: boardNodes,
         numButtons: numButtons
     };
 });
