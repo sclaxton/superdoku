@@ -10,7 +10,7 @@ define(['eventEmitter'], function(EventEmitter) {
     dispatcher.defineEvents([
         'win',
         'move',
-        'back',
+        'undo',
         'restart',
         'numpad',
         'modelUpdate',

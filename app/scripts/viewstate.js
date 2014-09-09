@@ -8,17 +8,14 @@ define(['onload', 'utils'], function(load, utils) {
 
     var flattenArray = utils.flattenArray;
 
-    var buttonsPromise = load.numButtons.then(function(val) {
+    var buttonsPromise = load.numButtonsPromise.then(function(val) {
         return flattenArray(val);
     });
-    var squaresPromise = load.boardNodes.then(function(val) {
+    var squaresPromise = load.boardNodesPromise.then(function(val) {
         return flattenArray(val);
     });
-    var allChildren = utils.allChildren;
-
-    // general state selectors
-    var masterContainer = '#master-container';
-    var controlContainer = '#control-container';
+    var focusOutSelectionPromise = load.focusOutSelectionPromise;
+    var bodySelectionPromise = load.bodySelectionPromise;
 
     // board state selectors
     var selectedSquareClass = '.expand-select';
@@ -30,15 +27,24 @@ define(['onload', 'utils'], function(load, utils) {
     var selectedButtonClass = '.button-select';
     var hoverButtonClass = '.button-hover';
 
-    var focusOutSelection = function() {
-        var master = allChildren(masterContainer);
-        var board = allChildren(boardOutermostContainer);
-        var control = allChildren(controlContainer);
-        return $(master).not(board + ',' + control);
-    };
+    // menu state selectos
+    var undoButtonSelector = '#undo';
+
+    function destroyHandlers() {
+        focusOutSelectionPromise.then(function($selection) {
+            $selection.off();
+        });
+        squaresPromise.then(function(squares) {
+            $(squares).off();
+        });
+        numButtonsPromise.then(function(buttons) {
+            $(buttons).off();
+        });
+    }
 
     return {
-        focusOutSelection: focusOutSelection,
+        focusOutSelectionPromise: focusOutSelectionPromise,
+        bodySelectionPromise: bodySelectionPromise,
         board: {
             squaresPromise: squaresPromise,
             squares: {
@@ -86,6 +92,9 @@ define(['onload', 'utils'], function(load, utils) {
             }
         },
         menu: {
+            destroyHandlers: destroyHandlers,
+            undoButtonSelector: undoButtonSelector,
+            resetButtonSelector: resetButtonSelector,
             onHover: function(node) {
                 node.classList.add(hoverButtonClass);
             },

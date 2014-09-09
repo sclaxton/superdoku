@@ -8,11 +8,8 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
     var eventDispatcher = events.dispatcher;
 
     function NumpadView(input) {
-        var buttons = [];
-        var flatButtons = flattenArray(input);
-        if (input) {
-            buttons = input;
-        }
+        var buttons = buttons || [];
+        var flatButtons = flattenArray(buttons);
         Object.deineProperties(this, {
             'buttons': {
                 get: function() {
@@ -30,6 +27,7 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
     function NumpadController(view) {
         // inherit instance properties from base controller class
         Controller.apply(this, view);
+        this.init();
     }
 
     // inhereit prototype from base controller class
@@ -42,6 +40,7 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
             var val = Number(e.target.name);
             eventDispatcher.emit('numpad', val);
         });
+        this.initViewState();
     };
 
     NumpadController.prototype.initViewState = function() {
@@ -51,20 +50,27 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
         var buttonOffHover = viewstate.numpad.button.offHover;
         var buttonUnselectAll = viewstate.numpad.button.unselectAll;
         var buttons = view.allButtons;
-        var focusOutSelection = viewstate.focusOutSelection();
+        var focusOutSelectionPromise = viewstate.focusOutSelectionPromise;
+        var bodySelectionPromise = viewstate.bodySelectionPromise;
 
         eventDispatcher.addListener('selectSquare', function(val) {
-            var buttonIndex = val - 1;
-            var button = buttons[buttonIndex];
-            buttonOnSelect(button);
+            if (val) {
+                var buttonIndex = val - 1;
+                var button = buttons[buttonIndex];
+                buttonOnSelect(button);
+            }
         });
 
-        $('body').on({
-            doubleTap: buttonUnselectAll
+        bodySelectionPromise.then(function($boday){
+          $body.on({
+              doubleTap: buttonUnselectAll
+          });
         });
 
-        $(focusOutSelection).on({
-            click: buttonUnselectAll
+        fadeOutSelectionPromise.then(function(focusOutSelection){
+          $(focusOutSelection).on({
+              click: buttonUnselectAll
+          });
         });
 
         $(this.allNodes).on({

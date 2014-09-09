@@ -6,11 +6,16 @@
 // and how long it takes it to load
 
 /*global define*/
-define(['zepto', 'bluebird'], function(zepto, Promise) {
+define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
+
+    var allChildren = utils.allChildren;
+    var masterContainer = '#master-container';
+    var controlContainer = '#control-container';
+    var resetButtonSelector = '#reset';
+
 
     var squaresDivClass = '.expandable';
     var numButtonsClass = '.num-button';
-
 
     function promiseDOM(resultFunction) {
         // we want to return a promise that resolves to a
@@ -56,8 +61,26 @@ define(['zepto', 'bluebird'], function(zepto, Promise) {
         return ret;
     });
 
+    var focusOutSelectionPromise = PromiseDOM(function($) {
+      var master = allChildren(masterContainer);
+      var board = allChildren(boardOutermostContainer);
+      var control = allChildren(controlContainer);
+      return $(master).not(board + ',' + control);
+    });
+
+    var bodySelectionPromise = PromiseDOM(function($){
+      return $('body');
+    });
+
+    var resetButtonPromise = PromiseDOM(function($){
+      return $(resetButtonSelector);
+    });
+
     return {
-        boardNodes: boardNodes,
-        numButtons: numButtons
+        boardNodesPromise: boardNodes,
+        numButtonsPromise: numButtons,
+        focusOutSelectionPromise: focusOutSelectionPromise,
+        bodySelectionPromise: bodySelectionPromise,
+        resetButtonPromise: resetButtonPromise
     };
 });
