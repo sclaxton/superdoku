@@ -11,10 +11,11 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
     var allChildren = utils.allChildren;
     var masterContainer = '#master-container';
     var controlContainer = '#control-container';
+    var boardOutermostContainer = '#board-square';
     var resetButtonSelector = '#reset';
 
 
-    var squaresDivClass = '.expandable';
+    var squaresDivClass = '.square';
     var numButtonsClass = '.num-button';
 
     function promiseDOM(resultFunction) {
@@ -61,19 +62,19 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
         return ret;
     });
 
-    var focusOutSelectionPromise = PromiseDOM(function($) {
-      var master = allChildren(masterContainer);
-      var board = allChildren(boardOutermostContainer);
-      var control = allChildren(controlContainer);
-      return $(master).not(board + ',' + control);
+    var focusOutSelectionPromise = promiseDOM(function($) {
+        var master = allChildren(masterContainer);
+        var board = allChildren(boardOutermostContainer);
+        var control = allChildren(controlContainer);
+        return $(master).not(board + ',' + control);
     });
 
-    var bodySelectionPromise = PromiseDOM(function($){
-      return $('body');
+    var bodySelectionPromise = promiseDOM(function($) {
+        return $('body');
     });
 
-    var resetButtonPromise = PromiseDOM(function($){
-      return $(resetButtonSelector);
+    var resetButtonPromise = promiseDOM(function($) {
+        return $(resetButtonSelector);
     });
 
     return {

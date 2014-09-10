@@ -8,9 +8,9 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
     var eventDispatcher = events.dispatcher;
 
     function NumpadView(input) {
-        var buttons = buttons || [];
+        var buttons = input || [];
         var flatButtons = flattenArray(buttons);
-        Object.deineProperties(this, {
+        Object.defineProperties(this, {
             'buttons': {
                 get: function() {
                     return buttons;
@@ -26,7 +26,7 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
 
     function NumpadController(view) {
         // inherit instance properties from base controller class
-        Controller.apply(this, view);
+        Controller.call(this, view);
         this.init();
     }
 
@@ -61,16 +61,16 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
             }
         });
 
-        bodySelectionPromise.then(function($boday){
-          $body.on({
-              doubleTap: buttonUnselectAll
-          });
+        bodySelectionPromise.then(function($body) {
+            $body.on({
+                doubleTap: buttonUnselectAll
+            });
         });
 
-        fadeOutSelectionPromise.then(function(focusOutSelection){
-          $(focusOutSelection).on({
-              click: buttonUnselectAll
-          });
+        focusOutSelectionPromise.then(function(focusOutSelection) {
+            $(focusOutSelection).on({
+                click: buttonUnselectAll
+            });
         });
 
         $(this.allNodes).on({

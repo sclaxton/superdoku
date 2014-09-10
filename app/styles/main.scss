@@ -115,6 +115,12 @@ button {
 
 #board-container {
   @extend .square-content-container;
+  td {
+    vertical-align: middle;
+  }
+  tr {
+    height: 33%;
+  }
 }
 
 #board-outer {
@@ -131,6 +137,18 @@ button {
   @extend .full;
   z-index: 2000;
   background-color: rgb(145,191,255);
+  display: table;
+}
+
+.center-square-text {
+  display: table-cell;
+  position: relative;
+  vertical-align: middle;
+  z-index: 1;
+}
+
+.square-text {
+  font-size: 2vw;
 }
 
 .expand-hover {
@@ -149,8 +167,8 @@ button {
   box-shadow:         6px 6px 15px 0px rgba(50, 50, 50, 0.73);
 }
 
-.inactive {
-  opacity: 50%;
+.inactive, .button-select {
+  background: rgba(145,191,255, 0.5);
 }
 
 #numpad-container {
@@ -201,5 +219,8 @@ and (max-width : 480px) {
     button {
       font-size: 4vw;
     }
+  }
+  .square-text {
+    font-size: 4vw;
   }
 }

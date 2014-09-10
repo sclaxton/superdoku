@@ -3,5 +3,5 @@ table
     tr
       - for (var c = 0; c < 3; c++)
         td
-          button(name=((r * 3) + c + 1).toString())
+          button.num-button(name=((r * 3) + c + 1).toString())
             = (r * 3) + c + 1

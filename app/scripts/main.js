@@ -24,7 +24,7 @@ require(['zepto', 'events', 'onload', 'board', 'game', 'numpad', 'viewstate', 'm
 
     var eventDispatcher = events.dispatcher;
     var boardNodesPromise = load.boardNodesPromise;
-    var numpadNodesPromise = load.boardNodesPromise;
+    var numpadNodesPromise = load.numButtonsPromise;
 
     var BoardData = board.data;
     var BoardView = board.view;
@@ -33,6 +33,8 @@ require(['zepto', 'events', 'onload', 'board', 'game', 'numpad', 'viewstate', 'm
     var NumpadView = numpad.view;
     var NumpadController = numpad.controller;
 
+    var Game = game.constructor;
+
     var boardData = modelstate.boardData;
 
     var boardModel = new BoardData(boardData);
@@ -40,20 +42,20 @@ require(['zepto', 'events', 'onload', 'board', 'game', 'numpad', 'viewstate', 'm
 
     function main() {
         boardNodesPromise.then(function(nodes) {
-            boardView = new BoardView(nodes);
+            boardView = new BoardView(nodes, boardModel);
             boardController = new BoardController(boardView, boardModel);
             newGame = new Game(boardController);
         });
 
         numpadNodesPromise.then(function(nodes) {
-            numpadView = NumpadView(nodes);
-            numpadController(numpadView);
+            numpadView = new NumpadView(nodes);
+            numpadController = new NumpadController(numpadView);
         });
     }
 
     function teardown() {
-        viewstate.destroyHandlers();
-        eventDispatcher.removeListeners(/.*/);
+        viewstate.menu.destroyHandlers();
+        eventDispatcher.removeAllListeners();
     }
 
     function restart(){
@@ -67,7 +69,7 @@ require(['zepto', 'events', 'onload', 'board', 'game', 'numpad', 'viewstate', 'm
             hover: viewstate.menu.onHover,
             mousedown: viewstate.menu.onPress,
             mouseup: viewstate.menu.offPress
-        })
+        });
     });
 
     main();

@@ -7,14 +7,14 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
     function(board, numpad, events, viewstate, utils) {
 
     var Controller = utils.controller;
-    var eventDispatcher = envents.dispatcher;
+    var eventDispatcher = events.dispatcher;
 
-    function Game(boardController) {
+    function Game(boardControllerInput) {
         // moves is a stack of triples row, col, valid 
         // row, col are integers and valid is a bool
         //  e.g. { row: i, col: j, valid: bool}
         var moves = [];
-        var boardController = boardController;
+        var boardController = boardControllerInput;
         var controller = new GameController();
 
         Object.defineProperties(this, {
@@ -37,6 +37,15 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
                 get: function() {
                     return controller;
                 }
+            },
+            'boardIsWin': {
+                get: function(){
+                    var model = this.boardController.model;
+                    var data = model.flatData;
+                    return data.every(function(square) {
+                        return square.value;
+                    }) && this.boardIsVaild;
+                }
             }
         });
     }
@@ -57,9 +66,10 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         var model = this.boardController.model;
         var subrow = row / 3;
         var subcol = col / 3;
+        var subsquare = flattenArray(model.subsquare(subrow, subcol));
         return containsUnique(model.row(row)) &&
             containsUnique(model.col(col)) &&
-            containsUnique(model.subsquare(subrow, subcol));
+            containsUnique(subsquare);
     };
 
     Game.prototype.pushMove = function(row, col, valid) {
@@ -75,19 +85,12 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         return this.moves.pop();
     };
 
-    Game.prototype.isMoveWin = function(row, col) {
-        var model = this.boardController.model;
-        var data = model.flatData;
-        return data.every(function(square) {
-            return square.value;
-        }) && this.boardIsVaild;
-    };
-
     Game.prototype.handleMove = function(row, col) {
-        if (this.isMoveWin(row, col)) {
+        
+        this.pushMove(row, col, this.moveVaild(row, col));
+
+        if (this.isBoardWin) {
             this.handleWin();
-        } else {
-            this.pushMove(row, col, this.moveVaild(row, col));
         }
     };
 
@@ -102,7 +105,7 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
     };
 
     Game.prototype.handleWin = function() {
-        window.alert("You win!");
+        window.alert('You win!');
         eventDispatcher.emit('win');
     };
 
@@ -118,7 +121,7 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         $undoButton.on({
             click: this.undo
         });
-    }
+    };
 
     GameController.initViewState = function() {
         var $undoButton = $(viewstate.menu.undoButtonSelector);
@@ -128,5 +131,10 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
             mousedown: onPress,
             mouseup: offPress
         });
-    }
+    };
+
+    return {
+        contructor: Game,
+        controller: GameController
+    };
 });

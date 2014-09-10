@@ -18,14 +18,14 @@ define(['onload', 'utils'], function(load, utils) {
     var bodySelectionPromise = load.bodySelectionPromise;
 
     // board state selectors
-    var selectedSquareClass = '.expand-select';
-    var hoverSquareClass = '.expand-hover';
-    var boardOutermostContainer = '#board-square';
-    var inactiveSquareSelector = '.inactive';
+    var squareClass = 'square';
+    var selectedSquareClass = 'expand-select';
+    var hoverSquareClass = 'expand-hover';
+    var inactiveSquareSelector = 'inactive';
 
     // numpad state selectors
-    var selectedButtonClass = '.button-select';
-    var hoverButtonClass = '.button-hover';
+    var selectedButtonClass = 'button-select';
+    var hoverButtonClass = 'button-hover';
 
     // menu state selectos
     var undoButtonSelector = '#undo';
@@ -37,7 +37,7 @@ define(['onload', 'utils'], function(load, utils) {
         squaresPromise.then(function(squares) {
             $(squares).off();
         });
-        numButtonsPromise.then(function(buttons) {
+        buttonsPromise.then(function(buttons) {
             $(buttons).off();
         });
     }
@@ -47,7 +47,17 @@ define(['onload', 'utils'], function(load, utils) {
         bodySelectionPromise: bodySelectionPromise,
         board: {
             squaresPromise: squaresPromise,
-            squares: {
+            square: {
+                getClosest: function(node){
+                  if(node.classList.contains(squareClass)){
+                    return node;
+                  } else {
+                    return $(node).parents('.' + squareClass).get(0);
+                  }
+                },
+                insertText: function(node, string) {
+                  $(node).find('span').text(string);
+                },
                 inactivate: function(node) {
                     node.classList.add(inactiveSquareSelector);
                 },
@@ -55,17 +65,17 @@ define(['onload', 'utils'], function(load, utils) {
                     var squares = squaresPromise.value();
                     $(squares).removeClass(selectedSquareClass);
                 },
-                onHover: function(node) {
-                    node.classList.add(hoverSquareClass);
+                onHover: function(e) {
+                    e.target.classList.add(hoverSquareClass);
                 },
-                offHover: function(node) {
-                    node.classList.remove(hoverSquareClass);
+                offHover: function(e) {
+                    e.target.classList.remove(hoverSquareClass);
                 },
-                onSelect: function(node) {
+                onSelect: function(e) {
                     // remove selection from other squares
                     var squares = squaresPromise.value();
                     $(squares).removeClass(selectedSquareClass);
-                    node.classList.add(selectedSquareClass);
+                    e.target.classList.add(selectedSquareClass);
                 }
             }
         },
@@ -77,16 +87,16 @@ define(['onload', 'utils'], function(load, utils) {
                     var buttons = buttonsPromise.value();
                     $(buttons).removeClass(selectedButtonClass);
                 },
-                onHover: function(node) {
-                    node.classList.add(hoverButtonClass);
+                onHover: function(e) {
+                    e.target.classList.add(hoverButtonClass);
                 },
-                offHover: function(node) {
-                    node.classList.remove(hoverButtonClass);
+                offHover: function(e) {
+                    e.target.classList.remove(hoverButtonClass);
                 },
                 onSelect: function(node) {
                     // remove selection from other buttons
                     var buttons = buttonsPromise.value();
-                    $(buttons).removeClass(selectedButtonClass);
+                    //$(buttons).removeClass(selectedButtonClass);
                     node.classList.add(selectedButtonClass);
                 }
             }
@@ -94,18 +104,17 @@ define(['onload', 'utils'], function(load, utils) {
         menu: {
             destroyHandlers: destroyHandlers,
             undoButtonSelector: undoButtonSelector,
-            resetButtonSelector: resetButtonSelector,
-            onHover: function(node) {
-                node.classList.add(hoverButtonClass);
+            onHover: function(e) {
+                e.target.classList.add(hoverButtonClass);
             },
-            offHover: function(node) {
-                node.classList.remove(hoverButtonClass);
+            offHover: function(e) {
+                e.target.classList.remove(hoverButtonClass);
             },
-            onPress: function(node) {
-                node.classList.add(selectedButtonClass);
+            onPress: function(e) {
+                e.target.classList.add(selectedButtonClass);
             },
-            offPress: function(node) {
-                node.classList.remove(selectedButtonClass);
+            offPress: function(e) {
+                e.target.classList.remove(selectedButtonClass);
             }
         }
     };

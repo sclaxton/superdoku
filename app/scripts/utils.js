@@ -15,6 +15,18 @@ define([], function() {
         return ret;
     }
 
+    function deepcopyArray(arr) {
+        var ret = [];
+        arr.forEach(function(element) {
+            if (Array.isArray(element)) {
+                ret.push(deepcopyArray(element));
+            } else {
+                ret.push(element);
+            }
+        });
+        return ret;
+    }
+
     function allChildren(selector) {
         return selector + ' *';
     }
@@ -40,7 +52,8 @@ define([], function() {
     return {
         controller: Controller,
         flattenArray: flattenArray,
-        allChildren: allChildren
+        allChildren: allChildren,
+        deepcopyArray: deepcopyArray
     };
 
 });
