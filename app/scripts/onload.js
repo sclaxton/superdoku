@@ -13,6 +13,9 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
     var boardOutermostContainer = '#board-square';
     var resetButtonSelector = '#reset';
     var undoButtonSelector = '#undo';
+    var checkButtonSelector = '#check';
+    var validBoardNotificationSelector = '#valid-board';
+    var invalidBoardNotificationSelector = '#invalid-board';
 
 
     var squaresDivClass = '.square';
@@ -70,11 +73,23 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
     });
 
     var resetButtonPromise = promiseDOM(function($) {
-        return $(resetButtonSelector);
+        return $(resetButtonSelector).get(0);
     });
 
     var undoButton = promiseDOM(function($) {
-        return $(undoButtonSelector);
+        return $(undoButtonSelector).get(0);
+    });
+
+    var checkButton = promiseDOM(function($) {
+        return $(checkButtonSelector).get(0);
+    });
+
+    var validNotification = promiseDOM(function($) {
+        return $(validBoardNotificationSelector).get(0);
+    });
+
+    var invalidNotification = promiseDOM(function($) {
+        return $(invalidBoardNotificationSelector).get(0);
     });
 
     return {
@@ -82,6 +97,9 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
         numButtonsPromise: numButtons,
         focusOutSelectionPromise: focusOutSelectionPromise,
         resetButtonPromise: resetButtonPromise,
-        undoButtonPromise: undoButton
+        undoButtonPromise: undoButton,
+        checkButtonPromise: checkButton,
+        invalidNotificationPromise: invalidNotification,
+        validNotificationPromise: validNotification
     };
 });

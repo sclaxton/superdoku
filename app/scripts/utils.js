@@ -3,11 +3,12 @@
 /*global define*/
 define([], function() {
 
-    function flattenArray(arr) {
+    function flattenArray(arr, deep) {
         var ret = [];
         arr.forEach(function(element) {
             if (Array.isArray(element)) {
-                ret = ret.concat(flattenArray(element));
+                var concatable = deep ? flattenArray(element, true) : deepcopyArray(element);
+                ret = ret.concat(concatable);
             } else {
                 ret.push(element);
             }
@@ -27,6 +28,30 @@ define([], function() {
         return ret;
     }
 
+    // Array#find method polyfill
+    if (!Array.prototype.find) {
+        Array.prototype.find = function(predicate) {
+            if (this === null) {
+                throw new TypeError('Array.prototype.find called on null or undefined');
+            }
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            var list = Object(this);
+            var length = list.length >>> 0;
+            var thisArg = arguments[1];
+            var value;
+
+            for (var i = 0; i < length; i++) {
+                value = list[i];
+                if (predicate.call(thisArg, value, i, list)) {
+                    return value;
+                }
+            }
+            return undefined;
+        };
+    }
+    
     function allChildren(selector) {
         return selector + ' *';
     }

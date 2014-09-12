@@ -11,7 +11,7 @@ define(['eventEmitter'], function(EventEmitter) {
         'win',
         'move',
         'undo',
-        'restart',
+        'reset',
         'numpad',
         'modelUpdate',
         'selectSquare',

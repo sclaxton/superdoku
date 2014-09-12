@@ -13,6 +13,12 @@ html
     // endbuild
 
   body
+    div(id='invalid-board' class='notify notify-red fade-hidden')
+      span(class="symbol icon-error")
+      | Uh oh! The board is invaild!
+    div(id='valid-board' class='notify notify-green fade-hidden')
+      span(class="symbol icon-tick")
+      | The board is valid!
     #master-container
       +square(id='board-square')
           #board-container
@@ -26,6 +32,8 @@ html
             | Undo
           button#reset(class='menu')
             | Reset
+          button#check(class='menu')
+            | Check
 
       // build:js(.tmp/concat) scripts/main.js
       script(type="text/javascript", src="scripts/main.js", async=true)

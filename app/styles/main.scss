@@ -62,13 +62,6 @@ table {
 }
 
 button {
-    text-align: center;
-    vertical-align: middle;
-    font-size: 2vw;
-    font-family: "museo_sans500", sans-serif;
-}
-
-button {
   @extend .full;
   border: 0px;
   border-radius: 10px;
@@ -76,6 +69,11 @@ button {
   -moz-border-radius: 10px / 3px;
   background: rgb(145,191,255);
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-align: center;
+  vertical-align: middle;
+  font-size: 2vw;
+  font-family: "museo_sans500", sans-serif;
+  padding: 0;
 }
 
 #master-container {
@@ -102,14 +100,22 @@ button {
   display: inline-block;
   margin: auto;
   margin-bottom: 1vw;
+  table {
+    border-collapse: separate;
+    td {
+      padding-bottom: 0 !important;
+      border-spacing: 0;
+      border-color: none;
+    }
+  }
 }
 
 #menu-container {
   button {
     font-size: 2vw;
     width: 100%;
-    margin-bottom: 1vw;
     padding: 1em;
+    margin-bottom: 1vw;
   }
 }
 
@@ -149,6 +155,7 @@ button {
 
 .square-text {
   font-size: 2vw;
+  font-family: "museo_sans500", sans-serif;
 }
 
 .expand-hover {
@@ -168,7 +175,7 @@ button {
 }
 
 .inactive, .button-select {
-  background: rgba(145,191,255, 0.33);
+  background: rgba(145,191,255, 0.33) !important;
 }
 
 .button-hover {
@@ -182,10 +189,81 @@ button {
   }
 }
 
+.symbol {
+    font-size: 0.9em;
+    font-family: Times New Roman;
+    border-radius: 1em;
+    padding: .1em .6em .1em .6em;
+    font-weight: bolder;
+    color: white;
+    background-color: #4E5A56;
+    float: left;
+}
+
+.icon-info { 
+  background-color: #3229CF; 
+}
+.icon-error { 
+  background: #e64943; font-family: Consolas; 
+}
+.icon-tick { 
+  background: #13c823; 
+}
+.icon-excl { 
+  background: #ffd54b; color: black; 
+}
+
+.icon-error:before { 
+  content: 'x'; 
+}
+.icon-tick:before { 
+  content: '\002713'; 
+}
+
+.notify {
+    background-color:#e3f7fc; 
+    color:#555; 
+    border:0.1em solid;
+    border-color: #8ed9f6;
+    border-radius:10px;
+    font-family:Tahoma,Geneva,Arial,sans-serif;
+    font-size:1.1em;
+    padding:10px 10px 10px 10px;
+    margin:10px;
+    cursor: default;
+    position: absolute;
+    z-index: 10000;
+    top: 5%;
+    text-align: center;
+    left:0; 
+    right:0;
+    margin: 0 auto;
+    max-width: 50%;
+}
+
+.notify-yellow { 
+  background: #fff8c4; 
+  border-color: #f7deae; 
+}
+.notify-red { background: #ffecec; 
+  border-color: #fad9d7; 
+}
+.notify-green { 
+  background: #e9ffd9; 
+  border-color: #D1FAB6; 
+}
+
+.fade-hidden {
+  opacity: 0;
+  transition: opacity .5s ease-out;
+  -moz-transition: opacity .5s ease-out;
+  -webkit-transition: opacity .5s ease-out;
+}
+
 // override certain properties for mobile screens
 @media only screen 
-and (min-width : 320px) 
-and (max-width : 480px) {
+and (min-width : 380px) 
+and (max-width : 580px) {
   html, body {
     height: inherit;
   }
@@ -212,6 +290,7 @@ and (max-width : 480px) {
     width: 35%;
     padding-left: 2%;
     button {
+      padding: 0.94em;
       margin-bottom: 2vw;
       font-size: 4vw;
     }

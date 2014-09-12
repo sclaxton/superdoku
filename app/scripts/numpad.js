@@ -10,7 +10,7 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
 
     function NumpadView(input) {
         var buttons = deepcopyArray(input) || [];
-        var flatButtons = flattenArray(deepcopyArray(buttons));
+        var flatButtons = flattenArray(deepcopyArray(buttons), true);
         Object.defineProperties(this, {
             'buttons': {
                 get: function() {
@@ -38,6 +38,7 @@ define(['zepto', 'events', 'utils', 'viewstate'], function(zepto, events, utils,
         var buttons = view.allButtons;
         var getClosestButton = viewstate.numpad.button.getClosest;
         $(buttons).on('click', function(e) {
+            console.log('hi');
             var button = getClosestButton(e.target);
             var val = Number(button.name);
             eventDispatcher.emit('numpad', val);

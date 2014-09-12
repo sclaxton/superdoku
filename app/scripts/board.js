@@ -52,17 +52,17 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
             },
             'flatData': {
                 get: function() {
-                    return flattenArray(data);
+                    return flattenArray(data, true);
                 }
             }
         });
     }
 
     BoardBase.prototype.initInput = function(input) {
-        copy = deepcopyArray(input);
-        copy.forEach(function(subrow, i) {
-            subrow.forEach(function(subsquare, j) {
-                subsquare.forEach(function(row, k) {
+        var copy = deepcopyArray(input);
+        copy.forEach(function(subrow) {
+            subrow.forEach(function(subsquare) {
+                subsquare.forEach(function(row) {
                     row.forEach(function(val, l, row) {
                         var ret;
                         if (val) {
@@ -100,7 +100,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         var rowIndex = i % 3;
         var data = this.data;
         var subrow = data[subrowIndex];
-        $.each(subrow, function(subsquare) {
+        subrow.forEach(function(subsquare) {
             res = res.concat(subsquare[rowIndex]);
         });
         return res;
@@ -109,7 +109,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     function _subCol(data, j) {
         var res = [];
         for (var i = 0; i < 3; i++) {
-            res.shift(data[i][j]);
+            res.push(data[i][j]);
         }
         return res;
     }
@@ -120,9 +120,10 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         var colIndex = j % 3;
         var data = this.data;
         var subcol = _subCol(data, subcolIndex);
-        $.each(subcol, function(subsquare) {
-            res = res.concat(subsquare[colIndex]);
+        subcol.forEach(function(subsquare) {
+            res = res.concat(_subCol(subsquare, colIndex));
         });
+        return res;
     };
 
     BoardBase.prototype.subsquare = function(i, j) {
@@ -182,8 +183,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         // defined there, namely:
         //  this.data
         BoardBase.call(this, input);
-        var activeSquare = null;
-        var allNodes = flattenArray(deepcopyArray(input));
+        var allNodes = flattenArray(deepcopyArray(input), true);
         Object.defineProperties(this, {
             'allNodes': {
                 get: function() {
@@ -212,16 +212,18 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     };
 
     BoardView.prototype.init = function(model) {
-        var modelData = flattenArray(model.data);
-        var viewData = flattenArray(this.data);
+        var modelData = flattenArray(model.data, true);
+        var viewData = flattenArray(this.data, true);
         var inactivateSquare = viewstate.board.square.inactivate;
         var insertText = viewstate.board.square.insertText;
         modelData.forEach(function(square, i) {
+            var domNode = viewData[i].value;
             if (square.value && square.immutable) {
-                var domNode = viewData[i].value;
                 insertText(domNode, square.value.toString());
                 inactivateSquare(domNode);
             } else {
+                var val = square.value || '';
+                insertText(domNode, val.toString());
                 viewData[i].immutable = false;
             }
         });
@@ -260,7 +262,6 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
                 var col = indexPair.col;
                 if (!model.squareIsImmutable(row, col)) {
                     var targetVal = model.squareVal(row, col);
-                    console.log(view);
                     self.activeSquare = indexPair;
                     eventDispatcher.emit('selectSquare', targetVal);
                 }
@@ -277,22 +278,20 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
 
         eventDispatcher.addListener('numpad', function(val) {
             var activeSquare = self.activeSquare;
-            if (activeSquare && !model.squareIsImmutable(row, col)) {
+            if (activeSquare) {
                 var row = activeSquare.row;
                 var col = activeSquare.col;
-                model.squareVal(row, col, val);
-                eventDispatcher.emit('modelUpdate', activeSquare, val);
-                eventDispatcher.emit('move', row, col);
+                if (!model.squareIsImmutable(row, col)) {
+                    model.squareVal(row, col, val);
+                    eventDispatcher.emit('modelUpdate', row, col, val);
+                    eventDispatcher.emit('move', row, col, val);
+                }
             }
         });
 
-        eventDispatcher.addListener('undo', function(row, col) {
-            model.squareVal(row, col, null);
-            console.log(model.squareVal(row, col));
-            eventDispatcher.emit('modelUpdate', {
-                row: row,
-                col: col
-            }, '');
+        eventDispatcher.addListener('undo', function(row, col, val) {
+            model.squareVal(row, col, val);
+            eventDispatcher.emit('modelUpdate', row, col, val);
         });
 
         this.initViewState();
@@ -301,9 +300,9 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     BoardController.prototype.initViewState = function() {
         var view = this.view;
         // viewstate info needed to alter view state
-        var squareUnselectAll = viewstate.board.square.unselectAll;
         var squareUnfocusAll = viewstate.board.square.unfocusAll;
         var squareOnSelect = viewstate.board.square.onSelect;
+        var squareOnSelectHandler = viewstate.board.square.onSelectHandler;
         var squareOnHover = viewstate.board.square.onHover;
         var squareOffHover = viewstate.board.square.offHover;
         var focusOutSelection = viewstate.focusOutSelectionPromise.value();
@@ -315,15 +314,17 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         });
 
         $(view.allNodes).on({
-            click: squareOnSelect,
+            click: squareOnSelectHandler,
             mouseenter: squareOnHover,
             mouseleave: squareOffHover
         });
 
-        eventDispatcher.addListener('modelUpdate', function(indexPair, val) {
-            var node = view.squareVal(indexPair.row, indexPair.col);
+        eventDispatcher.addListener('modelUpdate', function(row, col, val) {
+            var node = view.squareVal(row, col);
+            val = val || '';
             insertText(node, val.toString());
-            eventDispatcher.emit('viewUpdate', indexPair);
+            squareOnSelect(node);
+            eventDispatcher.emit('viewUpdate', row, col);
         });
 
     };
