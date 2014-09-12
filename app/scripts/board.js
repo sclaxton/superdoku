@@ -7,7 +7,7 @@
 
 /*global define*/
 define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, viewstate) {
-    var Controller = utils.controller;
+    var Controller = utils.mvcontroller;
     var flattenArray = utils.flattenArray;
     var deepcopyArray = utils.deepcopyArray;
     var eventDispatcher = events.dispatcher;
@@ -15,7 +15,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     // Square class abstracts squares
     // on the board grid
     function Square(val, moveable) {
-        var value = val;
+        var value = val || null;
         var immutable = moveable || false;
 
         // define properties of Square
@@ -141,7 +141,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
 
     BoardBase.prototype.squareVal = function(i, j, val) {
         var square = this.square(i, j);
-        if (val) {
+        if (val || val === null) {
             square.value = val;
             return val;
         } else {
@@ -149,7 +149,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         }
     };
 
-    BoardBase.prototype.isSquareImmutable = function(i, j) {
+    BoardBase.prototype.squareIsImmutable = function(i, j) {
         var square = this.square(i, j);
         return square.immutable;
     };
@@ -183,16 +183,8 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         //  this.data
         BoardBase.call(this, input);
         var activeSquare = null;
-        var allNodes = flattenArray(input);
+        var allNodes = flattenArray(deepcopyArray(input));
         Object.defineProperties(this, {
-            'activeSquare': {
-                get: function() {
-                    return activeSquare;
-                },
-                set: function(node) {
-                    activeSquare = node;
-                },
-            },
             'allNodes': {
                 get: function() {
                     return allNodes;
@@ -214,8 +206,8 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         var row = Math.floor(absoluteIndex / 3) % 3;
         var col = absoluteIndex % 3;
         return {
-            row: 3*subrow + row,
-            col: 3*subcol + col
+            row: 3 * subrow + row,
+            col: 3 * subcol + col
         };
     };
 
@@ -236,48 +228,71 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
     };
 
     function BoardController(view, model) {
+        var activeSquare = null;
+        Object.defineProperties(this, {
+            'activeSquare': {
+                get: function() {
+                    return activeSquare;
+                },
+                set: function(indexPair) {
+                    activeSquare = indexPair;
+                },
+            }
+        });
         Controller.call(this, view, model);
-        this.init();
     }
 
     BoardController.prototype = Object.create(Controller.prototype);
 
     BoardController.prototype.init = function() {
+        var self = this;
         var view = this.view;
         var model = this.model;
         var squares = view.allNodes;
         var getClosestSquare = viewstate.board.square.getClosest;
+        var focusOutSelection = viewstate.focusOutSelectionPromise.value();
+
         $(squares).on({
             click: function(e) {
                 var square = getClosestSquare(e.target);
                 var indexPair = view.indexOf(square);
-                var targetVal = model.squareVal(indexPair.row, indexPair.col);
-                view.activeSquare = indexPair;
-                eventDispatcher.emit('selectSquare', targetVal);
+                var row = indexPair.row;
+                var col = indexPair.col;
+                if (!model.squareIsImmutable(row, col)) {
+                    var targetVal = model.squareVal(row, col);
+                    console.log(view);
+                    self.activeSquare = indexPair;
+                    eventDispatcher.emit('selectSquare', targetVal);
+                }
+            }
+        });
+
+        $(focusOutSelection).on({
+            click: function(e) {
+                if (focusOutSelection.indexOf(e.target) > -1) {
+                    self.activeSquare = null;
+                }
             }
         });
 
         eventDispatcher.addListener('numpad', function(val) {
-            var activeSquare = view.activeSquare;
-            var row = activeSquare.row;
-            var col = activeSquare.col;
-            if (activeSquare && !model.isSquareImmutable(row, col)) {
+            var activeSquare = self.activeSquare;
+            if (activeSquare && !model.squareIsImmutable(row, col)) {
+                var row = activeSquare.row;
+                var col = activeSquare.col;
                 model.squareVal(row, col, val);
                 eventDispatcher.emit('modelUpdate', activeSquare, val);
-                eventDispatcher.emit('boardChange', activeSquare);
+                eventDispatcher.emit('move', row, col);
             }
         });
 
-        eventDispatcher.addListener('modelUpdate', function(indexPair, val) {
-            var node = view.squareVal(indexPair.row, indexPair.col);
-            node.textContent = val.toString();
-            eventDispatcher.emit('boardChange', indexPair);
-        });
-
-        eventDispatcher.addListener('back', function(row, col) {
-            model.squareVal(row, col, undefined);
-            var node = view.squareVal(row, col);
-            node.textContent = '';
+        eventDispatcher.addListener('undo', function(row, col) {
+            model.squareVal(row, col, null);
+            console.log(model.squareVal(row, col));
+            eventDispatcher.emit('modelUpdate', {
+                row: row,
+                col: col
+            }, '');
         });
 
         this.initViewState();
@@ -287,35 +302,30 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
         var view = this.view;
         // viewstate info needed to alter view state
         var squareUnselectAll = viewstate.board.square.unselectAll;
+        var squareUnfocusAll = viewstate.board.square.unfocusAll;
         var squareOnSelect = viewstate.board.square.onSelect;
         var squareOnHover = viewstate.board.square.onHover;
         var squareOffHover = viewstate.board.square.offHover;
-        var focusOutSelectionPromise = viewstate.focusOutSelectionPromise;
-        var bodySelectionPromise = viewstate.bodySelectionPromise;
+        var focusOutSelection = viewstate.focusOutSelectionPromise.value();
+        var insertText = viewstate.board.square.insertText;
 
-        function unfocusSquare() {
-            squareUnselectAll();
-            view.activeSquare = null;
-        }
-
-        bodySelectionPromise.then(function($body) {
-            $body.on({
-                doubleTap: unfocusSquare
-            });
+        $(focusOutSelection).on({
+            click: squareUnfocusAll,
+            doubleTap: squareUnfocusAll
         });
 
-        focusOutSelectionPromise.then(function(focusOutSelection) {
-            $(focusOutSelection).on({
-                click: unfocusSquare
-            });
-        });
-
-
-        $(this.allNodes).on({
+        $(view.allNodes).on({
             click: squareOnSelect,
             mouseenter: squareOnHover,
             mouseleave: squareOffHover
         });
+
+        eventDispatcher.addListener('modelUpdate', function(indexPair, val) {
+            var node = view.squareVal(indexPair.row, indexPair.col);
+            insertText(node, val.toString());
+            eventDispatcher.emit('viewUpdate', indexPair);
+        });
+
     };
 
     return {

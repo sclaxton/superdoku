@@ -14,7 +14,8 @@ define(['eventEmitter'], function(EventEmitter) {
         'restart',
         'numpad',
         'modelUpdate',
-        'selectSquare'
+        'selectSquare',
+        'viewUpdate'
     ]);
 
     return {

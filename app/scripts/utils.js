@@ -31,7 +31,7 @@ define([], function() {
         return selector + ' *';
     }
 
-    function Controller(view, model) {
+    function MVController(view, model) {
         Object.defineProperties(this, {
             'view': {
                 get: function() {
@@ -47,10 +47,10 @@ define([], function() {
         this.init();
     }
 
-    Controller.prototype.init = function() {};
+    MVController.prototype.init = function() {};
 
     return {
-        controller: Controller,
+        mvcontroller: MVController,
         flattenArray: flattenArray,
         allChildren: allChildren,
         deepcopyArray: deepcopyArray

@@ -9,10 +9,10 @@
 define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
 
     var allChildren = utils.allChildren;
-    var masterContainer = '#master-container';
     var controlContainer = '#control-container';
     var boardOutermostContainer = '#board-square';
     var resetButtonSelector = '#reset';
+    var undoButtonSelector = '#undo';
 
 
     var squaresDivClass = '.square';
@@ -63,25 +63,25 @@ define(['zepto', 'bluebird', 'utils'], function(zepto, Promise, utils) {
     });
 
     var focusOutSelectionPromise = promiseDOM(function($) {
-        var master = allChildren(masterContainer);
+        var body = 'body,' + allChildren('body');
         var board = allChildren(boardOutermostContainer);
         var control = allChildren(controlContainer);
-        return $(master).not(board + ',' + control);
-    });
-
-    var bodySelectionPromise = promiseDOM(function($) {
-        return $('body');
+        return $(body).not(board + ',' + control);
     });
 
     var resetButtonPromise = promiseDOM(function($) {
         return $(resetButtonSelector);
     });
 
+    var undoButton = promiseDOM(function($) {
+        return $(undoButtonSelector);
+    });
+
     return {
         boardNodesPromise: boardNodes,
         numButtonsPromise: numButtons,
         focusOutSelectionPromise: focusOutSelectionPromise,
-        bodySelectionPromise: bodySelectionPromise,
-        resetButtonPromise: resetButtonPromise
+        resetButtonPromise: resetButtonPromise,
+        undoButtonPromise: undoButton
     };
 });

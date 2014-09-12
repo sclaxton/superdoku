@@ -15,7 +15,6 @@ define(['onload', 'utils'], function(load, utils) {
         return flattenArray(val);
     });
     var focusOutSelectionPromise = load.focusOutSelectionPromise;
-    var bodySelectionPromise = load.bodySelectionPromise;
 
     // board state selectors
     var squareClass = 'square';
@@ -27,94 +26,135 @@ define(['onload', 'utils'], function(load, utils) {
     var selectedButtonClass = 'button-select';
     var hoverButtonClass = 'button-hover';
 
-    // menu state selectos
-    var undoButtonSelector = '#undo';
+    // general actions
 
-    function destroyHandlers() {
-        focusOutSelectionPromise.then(function($selection) {
-            $selection.off();
-        });
-        squaresPromise.then(function(squares) {
-            $(squares).off();
-        });
-        buttonsPromise.then(function(buttons) {
-            $(buttons).off();
-        });
+    function getClosest(startnode, selector) {
+        if (startnode.classList.contains(squareClass) ||
+            startnode.tagName.toUpperCase() == selector.toUpperCase() ||
+            startnode.id == selector) {
+            return startnode;
+        } else {
+            return $(startnode).parents(selector).get(0);
+        }
+    }
+
+    function isActive(node) {
+        return !node.classList.contains('inactive');
+    }
+
+    // board actions
+
+    function getClosestSquare(startnode) {
+        return getClosest(startnode, '.' + squareClass);
+    }
+
+    function unselectAllSquares() {
+        // remove selection from other buttons
+        var squares = squaresPromise.value();
+        $(squares).removeClass(selectedSquareClass);
+    }
+
+    // numpad actions
+
+    function getClosestButton(startnode) {
+        return getClosest(startnode, 'button');
+    }
+
+    function unselectAllButtons() {
+        // remove selection from other buttons
+        var buttons = buttonsPromise.value();
+        $(buttons).removeClass(selectedButtonClass);
+    }
+
+    function buttonOnSelect(node) {
+        // remove selection from other buttons
+        var buttons = buttonsPromise.value();
+        $(buttons).removeClass(selectedButtonClass);
+        node.classList.add(selectedButtonClass);
     }
 
     return {
         focusOutSelectionPromise: focusOutSelectionPromise,
-        bodySelectionPromise: bodySelectionPromise,
         board: {
             squaresPromise: squaresPromise,
             square: {
-                getClosest: function(node){
-                  if(node.classList.contains(squareClass)){
-                    return node;
-                  } else {
-                    return $(node).parents('.' + squareClass).get(0);
-                  }
-                },
+                getClosest: getClosestSquare,
                 insertText: function(node, string) {
-                  $(node).find('span').text(string);
+                    $(node).find('span').text(string);
                 },
                 inactivate: function(node) {
                     node.classList.add(inactiveSquareSelector);
                 },
-                unselectAll: function() {
-                    var squares = squaresPromise.value();
-                    $(squares).removeClass(selectedSquareClass);
+                unselectAll: unselectAllSquares,
+                unfocusAll: function(e) {
+                    var focusOutSelection = focusOutSelectionPromise.value();
+                    if (focusOutSelection.indexOf(e.target) > -1) {
+                        unselectAllSquares();
+                    }
                 },
                 onHover: function(e) {
-                    e.target.classList.add(hoverSquareClass);
+                    var square = getClosest(e.target, '.' + squareClass);
+                    if (isActive(square)) {
+                        square.classList.add(hoverSquareClass);
+                    }
                 },
                 offHover: function(e) {
-                    e.target.classList.remove(hoverSquareClass);
+                    var square = getClosest(e.target, '.' + squareClass);
+                    square.classList.remove(hoverSquareClass);
                 },
                 onSelect: function(e) {
                     // remove selection from other squares
                     var squares = squaresPromise.value();
                     $(squares).removeClass(selectedSquareClass);
-                    e.target.classList.add(selectedSquareClass);
+                    var square = getClosest(e.target, '.' + squareClass);
+                    if (isActive(square)) {
+                        square.classList.add(selectedSquareClass);
+                    }
                 }
             }
         },
         numpad: {
             buttonsPromise: buttonsPromise,
             button: {
-                unselectAll: function() {
-                    // remove selection from other buttons
-                    var buttons = buttonsPromise.value();
-                    $(buttons).removeClass(selectedButtonClass);
+                getClosest: getClosestButton,
+                unselectAll: unselectAllButtons,
+                unfocusAll: function(e) {
+                    var focusOutSelection = focusOutSelectionPromise.value();
+                    if (focusOutSelection.indexOf(e.target) > -1) {
+                        unselectAllButtons();
+                    }
                 },
                 onHover: function(e) {
-                    e.target.classList.add(hoverButtonClass);
+                    var button = getClosest(e.target, 'button');
+                    button.classList.add(hoverButtonClass);
                 },
                 offHover: function(e) {
-                    e.target.classList.remove(hoverButtonClass);
+                    var button = getClosest(e.target, 'button');
+                    button.classList.remove(hoverButtonClass);
                 },
-                onSelect: function(node) {
-                    // remove selection from other buttons
-                    var buttons = buttonsPromise.value();
-                    //$(buttons).removeClass(selectedButtonClass);
-                    node.classList.add(selectedButtonClass);
+                onSelect: buttonOnSelect,
+                onSelectHandler: function(e) {
+                    var button = getClosest(e.target, 'button');
+                    buttonOnSelect(button);
                 }
             }
         },
         menu: {
-            destroyHandlers: destroyHandlers,
-            undoButtonSelector: undoButtonSelector,
             onHover: function(e) {
-                e.target.classList.add(hoverButtonClass);
+                var button = getClosest(e.target, 'button');
+                button.classList.add(hoverButtonClass);
             },
             offHover: function(e) {
-                e.target.classList.remove(hoverButtonClass);
+                var button = getClosest(e.target, 'button');
+                button.classList.remove(hoverButtonClass);
             },
             onPress: function(e) {
-                e.target.classList.add(selectedButtonClass);
+                var button = getClosest(e.target, 'button');
+                button.classList.add(selectedButtonClass);
             },
             offPress: function(e) {
-                e.target.classList.remove(selectedButtonClass);
+                var button = getClosest(e.target, 'button');
+                button.classList.remove(selectedButtonClass);
             }
         }
     };

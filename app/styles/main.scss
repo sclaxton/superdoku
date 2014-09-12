@@ -135,9 +135,9 @@ button {
 
 .square {
   @extend .full;
-  z-index: 2000;
   background-color: rgb(145,191,255);
   display: table;
+  position: relative;
 }
 
 .center-square-text {
@@ -152,14 +152,14 @@ button {
 }
 
 .expand-hover {
-  z-index: 1000;
+  z-index: 2000;
   -webkit-transform: scale(1.2);
   -webkit-box-shadow: 6px 6px 15px 0px rgba(50, 50, 50, 0.73);
   -moz-box-shadow:    6px 6px 15px 0px rgba(50, 50, 50, 0.73);
   box-shadow:         6px 6px 15px 0px rgba(50, 50, 50, 0.73);
 }
 
-.expand-active {
+.expand-select {
   z-index: 1000;
   -webkit-transform: scale(1.5);
   -webkit-box-shadow: 6px 6px 15px 0px rgba(50, 50, 50, 0.73);
@@ -168,7 +168,11 @@ button {
 }
 
 .inactive, .button-select {
-  background: rgba(145,191,255, 0.5);
+  background: rgba(145,191,255, 0.33);
+}
+
+.button-hover {
+  background: rgba(145,191,255, 0.66);
 }
 
 #numpad-container {

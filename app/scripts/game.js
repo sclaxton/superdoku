@@ -3,11 +3,11 @@
 // The game module exposes the Game class
 
 /*global define*/
-define(['board', 'numpad', 'events', 'viewstate', 'utils'],
-    function(board, numpad, events, viewstate, utils) {
+define(['board', 'numpad', 'events', 'viewstate', 'utils', 'onload'],
+    function(board, numpad, events, viewstate, utils, load) {
 
-    var Controller = utils.controller;
     var eventDispatcher = events.dispatcher;
+    var flattenArray = utils.flattenArray;
 
     function Game(boardControllerInput) {
         // moves is a stack of triples row, col, valid 
@@ -15,8 +15,7 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         //  e.g. { row: i, col: j, valid: bool}
         var moves = [];
         var boardController = boardControllerInput;
-        var controller = new GameController();
-
+        var controller = new GameController(this);
         Object.defineProperties(this, {
             'moves': {
                 get: function() {
@@ -52,7 +51,7 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
 
     function containsUnique(arr) {
         var map = [];
-        arr.every(function(num) {
+        return arr.every(function(num) {
             if (map[num]) {
                 return false;
             } else {
@@ -62,10 +61,10 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         });
     }
 
-    Game.prototype.moveVaild = function(row, col) {
+    Game.prototype.moveIsVaild = function(row, col) {
         var model = this.boardController.model;
-        var subrow = row / 3;
-        var subcol = col / 3;
+        var subrow = Math.floor(row / 3);
+        var subcol = Math.floor(col / 3);
         var subsquare = flattenArray(model.subsquare(subrow, subcol));
         return containsUnique(model.row(row)) &&
             containsUnique(model.col(col)) &&
@@ -87,20 +86,10 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
 
     Game.prototype.handleMove = function(row, col) {
         
-        this.pushMove(row, col, this.moveVaild(row, col));
+        this.pushMove(row, col, this.moveIsVaild(row, col));
 
         if (this.isBoardWin) {
             this.handleWin();
-        }
-    };
-
-    // pop the last move off the stack
-    // then fire back event so board
-    // controller can restore model and view
-    Game.prototype.undo = function() {
-        var move = this.popMove();
-        if (move) {
-            eventDispatcher.emit('undo', move.row, move.col);
         }
     };
 
@@ -109,32 +98,58 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils'],
         eventDispatcher.emit('win');
     };
 
-    function GameController() {
-        Controller.call(this);
+    function GameController(gameInstance) {
+        var game = gameInstance;
+        Object.defineProperties(this, {
+            'game': {
+                get: function(){
+                    return game;
+                }
+            }
+        });
         this.init();
     }
 
-    GameController.prototype = Object.create(Controller.prototype);
-
     GameController.prototype.init = function() {
-        var $undoButton = $(viewstate.menu.undoButtonSelector);
-        $undoButton.on({
-            click: this.undo
+        var game = this.game;
+        var undoButton = load.undoButtonPromise.value();
+
+        $(undoButton).on({
+            click: function(){
+                var move = game.popMove();
+                console.log(game.moves);
+                console.log(move);
+                if (move) {
+                    eventDispatcher.emit('undo', move.row, move.col);
+                }
+            }
         });
+
+        eventDispatcher.addListener('move', function(row, col){
+            game.handleMove(row, col);
+        });
+
+        this.initViewState();
+
     };
 
-    GameController.initViewState = function() {
-        var $undoButton = $(viewstate.menu.undoButtonSelector);
+    GameController.prototype.initViewState = function() {
+        var undoButton = load.undoButtonPromise.value();
         var onPress = viewstate.menu.onPress;
         var offPress = viewstate.menu.offPress;
-        $undoButton.on({
+        var onHover = viewstate.menu.onHover;
+        var offHover = viewstate.menu.offHover;
+        
+        $(undoButton).on({
+            mouseenter: onHover,
+            mouseleave: offHover,
             mousedown: onPress,
             mouseup: offPress
         });
     };
 
     return {
-        contructor: Game,
+        construct: Game,
         controller: GameController
     };
 });
