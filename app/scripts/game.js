@@ -52,7 +52,7 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils', 'onload'],
         }
 
         function val(el) {
-            return el;
+            return el.value;
         }
 
         Game.prototype.boardIsVaild = function() {
