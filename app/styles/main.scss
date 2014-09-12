@@ -255,9 +255,13 @@ button {
 
 .fade-hidden {
   opacity: 0;
-  transition: opacity .5s ease-out;
-  -moz-transition: opacity .5s ease-out;
-  -webkit-transition: opacity .5s ease-out;
+  transition: opacity .5s ease-in;
+  -moz-transition: opacity .5s ease-in;
+  -webkit-transition: opacity .5s ease-in;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 // override certain properties for mobile screens

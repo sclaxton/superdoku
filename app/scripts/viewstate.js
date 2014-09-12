@@ -19,6 +19,7 @@ define(['onload', 'utils'], function(load, utils) {
     var invalidNotification = load.invalidNotificationPromise;
 
     // game state selectors
+    var visibulityHiddenClass = 'hidden';
     var notificationHideSelector = 'fade-hidden';
 
     // board state selectors
@@ -53,7 +54,7 @@ define(['onload', 'utils'], function(load, utils) {
     }
 
     function toastNotification(node, duration) {
-        node.classList.remove(notificationHideSelector);
+        node.classList.remove(notificationHideSelector, visibulityHiddenClass);
         setTimeout(function() {
             node.classList.add(notificationHideSelector);
         }, duration);
