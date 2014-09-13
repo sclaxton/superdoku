@@ -90,7 +90,10 @@ require(['zepto', 'events', 'onload', 'board', 'game', 'numpad', 'viewstate', 'm
             $(button).on({
                 click: reset,
                 mouseenter: viewstate.menu.onHover,
-                mouseleave: viewstate.menu.offHover,
+                mouseleave: function(e){
+                    viewstate.menu.offHover(e);
+                    viewstate.menu.offPress(e);
+                },
                 mousedown: viewstate.menu.onPress,
                 mouseup: viewstate.menu.offPress
             });

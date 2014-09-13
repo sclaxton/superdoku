@@ -34,7 +34,6 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils', 'onload'],
                 }
             });
         }
-
         function containsUnique(arr) {
             var map = [];
             return arr.every(function(num) {
@@ -164,7 +163,10 @@ define(['board', 'numpad', 'events', 'viewstate', 'utils', 'onload'],
 
             $([undoButton, checkButton]).on({
                 mouseenter: onHover,
-                mouseleave: offHover,
+                mouseleave: function(e) {
+                    offHover(e);
+                    offPress(e);
+                },
                 mousedown: onPress,
                 mouseup: offPress
             });

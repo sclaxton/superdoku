@@ -291,6 +291,7 @@ define(['zepto', 'utils', 'events', 'viewstate'], function($, utils, events, vie
 
         eventDispatcher.addListener('undo', function(row, col, val) {
             model.squareVal(row, col, val);
+            self.activeSquare = { row: row, col: col };
             eventDispatcher.emit('modelUpdate', row, col, val);
         });
 
