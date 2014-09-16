@@ -31,3 +31,7 @@ I also used the [bluebird](https://github.com/petkaantonov/bluebird) and [EventE
 #### Deployment
 
 I deployed the app on an AWS Elastic Beanstalk server. I used the Elastic Beanstalk CLI tool to automate deployment and deploy directly from a git repo.
+
+## Future
+
+I actually plan to add a backend in the next month that provides a crowd-sourced puzzle gallery. Users can login and solve puzzles. For the puzzles that they have solved their solve time gets archived and they have the option to rate the puzzle difficulty on some numeric scale. The difficulty of the puzzle would then be computed by some aggregation of solve time and rating. Further, I plan to make it very simple to add new puzzles to the app puzzle gallery, perhaps including OCR technology allowing users to upload a puzzle by taking a picture of it.
