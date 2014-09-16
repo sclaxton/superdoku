@@ -28,6 +28,7 @@ define([], function() {
         return ret;
     }
 
+    /* jshint ignore:start */
     // Array#find method polyfill
     if (!Array.prototype.find) {
         Array.prototype.find = function(predicate) {
@@ -51,6 +52,7 @@ define([], function() {
             return undefined;
         };
     }
+    /* jshint ignore:end */
     
     function allChildren(selector) {
         return selector + ' *';
