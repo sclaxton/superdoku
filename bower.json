@@ -4,7 +4,8 @@
   "dependencies": {
     "almond": "~0.3.0",
     "eventEmitter": "~4.2.8",
-    "zepto-full": "~1.1.2"
+    "zepto-full": "~1.1.2",
+    "bluebird": "~2.3.2"
   },
   "devDependencies": {}
 }
